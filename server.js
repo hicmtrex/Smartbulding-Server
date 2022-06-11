@@ -8,10 +8,13 @@ const { ExpressPeerServer } = require('peer');
 const path = require('path');
 const morgan = require('morgan');
 const colors = require('colors');
+const connectDb = require('./config/db');
+
+connectDb();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({ origin: process.env.FRONT_URL }));
 app.use(cookieParser());
 
 if (process.env.NODE_ENV === 'development') {
@@ -37,22 +40,6 @@ app.use('/api', require('./routes/categoryRouter'));
 app.use('/api', require('./routes/commentRouter'));
 app.use('/api', require('./routes/notifyRouter'));
 app.use('/api', require('./routes/messageRouter'));
-
-const URI = process.env.MONGO_URL;
-
-const connectDb = async () => {
-  try {
-    const db = await mongoose.connect(URI, {
-      useUnifiedTopology: true,
-      useNewUrlParser: true,
-    });
-    console.log(`MongoDB Connected: ${db.connection.host}`.cyan.underline);
-  } catch (error) {
-    console.error(`Error: ${error.message}`.red.underline.bold);
-    process.exit(1);
-  }
-};
-connectDb();
 
 const PORT = process.env.PORT || 5000;
 
